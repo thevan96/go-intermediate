@@ -1,48 +1,33 @@
 package main
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
-	"os"
 	"strconv"
 )
 
-type Shape interface {
-	Area() float64
-}
+func validateAge(s string) (int, error) {
+	num, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, fmt.Errorf("parse: %w", err)
+	}
 
-type Circle struct {
-	Radius float64
-}
+	if num < 0 {
+		return 0, errors.New("negative")
+	}
 
-func (c Circle) Area() float64 {
-	return 3.14 * c.Radius * c.Radius
-}
-
-type Square struct {
-	Side float64
-}
-
-func (s Square) Area() float64 {
-	return s.Side * s.Side
+	return num, nil
 }
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	kind := scanner.Text()
+	var s string
+	fmt.Scan(&s)
 
-	scanner.Scan()
-	dim, _ := strconv.ParseFloat(scanner.Text(), 64)
-
-	var s Shape
-	if kind == "circle" {
-		s = Circle{Radius: dim}
-	} else if kind == "square" {
-		s = Square{Side: dim}
+	num, err := validateAge(s)
+	if err != nil {
+		fmt.Printf("error: %s\n", err.Error())
+	} else {
+		fmt.Printf("age: %d\n", num)
 	}
 
-	if s != nil {
-		fmt.Printf("%.2f\n", s.Area())
-	}
 }
