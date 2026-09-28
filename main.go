@@ -1,48 +1,41 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"sync"
+	"os"
 )
 
+func square(in <-chan int) <-chan int {
+	out := make(chan int)
+	go func() {
+		defer close(out)
+		for n := range in {
+			out <- n * n
+		}
+	}()
+
+	return out
+}
+
 func main() {
-	var n int
-	fmt.Scan(&n)
-
-	nums := make([]int, n)
-	for i := range nums {
-		fmt.Scan(&nums[i])
-	}
-
-	chunkSize := (n + 3) / 4
-	var total int
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-	for i := 0; i < 4; i++ {
-		start := i * chunkSize
-		end := start + chunkSize
-
-		if start >= n {
-			start = n
-		}
-
-		if end > n {
-			end = n
-		}
-
-		wg.Add(1)
-		go func(i, j int) {
-			defer wg.Done()
-			partialSum := 0
-			for _, value := range nums[i:j] {
-				partialSum += value
+	reader := bufio.NewReader(os.Stdin)
+	a := make(chan int)
+	go func() {
+		defer close(a)
+		for {
+			var n int
+			if _, err := fmt.Fscan(reader, &n); err != nil {
+				break
 			}
-			mu.Lock()
-			total += partialSum
-			mu.Unlock()
-		}(start, end)
-	}
+			a <- n
+		}
+	}()
 
-	wg.Wait()
-	fmt.Println(total)
+	b := square(a)
+	var sum int
+	for n := range b {
+		sum += n
+	}
+	fmt.Println(sum)
 }
