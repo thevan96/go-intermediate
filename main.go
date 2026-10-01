@@ -1,41 +1,28 @@
 package main
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
-	"os"
 )
 
-func square(in <-chan int) <-chan int {
-	out := make(chan int)
-	go func() {
-		defer close(out)
-		for n := range in {
-			out <- n * n
+func safeDivide(a, b int) (q int, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("divide by zero")
 		}
 	}()
 
-	return out
+	q = a / b
+	return q, nil
 }
 
 func main() {
-	reader := bufio.NewReader(os.Stdin)
-	a := make(chan int)
-	go func() {
-		defer close(a)
-		for {
-			var n int
-			if _, err := fmt.Fscan(reader, &n); err != nil {
-				break
-			}
-			a <- n
-		}
-	}()
-
-	b := square(a)
-	var sum int
-	for n := range b {
-		sum += n
+	var a, b int
+	fmt.Scan(&a)
+	fmt.Scan(&b)
+	if div, err := safeDivide(a, b); err != nil {
+		fmt.Printf("error: %s\n", err)
+	} else {
+		fmt.Printf("result: %d\n", div)
 	}
-	fmt.Println(sum)
 }
