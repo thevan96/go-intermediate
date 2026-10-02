@@ -1,28 +1,44 @@
 package main
 
-import (
-	"errors"
-	"fmt"
-)
+import "fmt"
 
-func safeDivide(a, b int) (q int, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("divide by zero")
-		}
-	}()
+type Stack struct {
+	items []int
+}
 
-	q = a / b
-	return q, nil
+func (s *Stack) Push(x int) {
+	s.items = append(s.items, x)
+}
+
+func (s *Stack) Pop() (int, bool) {
+	n := len(s.items)
+	if n == 0 {
+		return 0, false
+	}
+
+	top := s.items[n-1]
+	s.items = s.items[:n-1]
+
+	return top, true
 }
 
 func main() {
-	var a, b int
-	fmt.Scan(&a)
-	fmt.Scan(&b)
-	if div, err := safeDivide(a, b); err != nil {
-		fmt.Printf("error: %s\n", err)
-	} else {
-		fmt.Printf("result: %d\n", div)
+	var s Stack
+	var n int
+	for {
+		_, err := fmt.Scan(&n)
+		if err != nil {
+			break
+		}
+
+		s.Push(n)
+	}
+
+	for {
+		num, ok := s.Pop()
+		if !ok {
+			break
+		}
+		fmt.Println(num)
 	}
 }
