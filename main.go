@@ -1,44 +1,34 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
-type Stack struct {
-	items []int
+type Logger struct {
 }
 
-func (s *Stack) Push(x int) {
-	s.items = append(s.items, x)
+func (l Logger) Log(msg string) {
+	fmt.Printf("[log] %s\n", msg)
 }
 
-func (s *Stack) Pop() (int, bool) {
-	n := len(s.items)
-	if n == 0 {
-		return 0, false
-	}
+type Counter struct {
+	Logger
+	count int
+}
 
-	top := s.items[n-1]
-	s.items = s.items[:n-1]
+func (c *Counter) Inc() {
+	c.count++
 
-	return top, true
+	numRaw := strconv.Itoa(c.count)
+	c.Log(numRaw)
 }
 
 func main() {
-	var s Stack
-	var n int
-	for {
-		_, err := fmt.Scan(&n)
-		if err != nil {
-			break
-		}
-
-		s.Push(n)
-	}
-
-	for {
-		num, ok := s.Pop()
-		if !ok {
-			break
-		}
-		fmt.Println(num)
+	var num int
+	fmt.Scan(&num)
+	var c Counter
+	for i := 0; i < num; i++ {
+		c.Inc()
 	}
 }
